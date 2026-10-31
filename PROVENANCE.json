@@ -2,9 +2,9 @@
   "local_base_commit": "2daf020639d25b8875e067dd47db41a669ccadfd",
   "upstream": "https://github.com/kOtusin/uniloader",
   "snapshot": {
-    "date": "2026-10-31",
-    "stage": "GPU31",
-    "status": "Experimental source snapshot. GPU30 phone confirms PP0 texture sampling and same-VA update, then fails first blend because PP clear RGBA and writeback BGRA differ. GPU31 corrects the clear packing; device validation pending. iOS GLES/EAGL backend remains unimplemented."
+    "date": "2026-11-01",
+    "stage": "HUD32",
+    "status": "Compact runtime overlay: GPU, BAT and LIVE IRQ only; GPU error detail adds one row. Retains GPU31 clear packing and all input/trace/VM behavior. Physical GPU31 blend and PP1-3 validation pending; iOS GLES/EAGL backend remains unimplemented."
   },
   "includes_working_tree_changes": true
 }

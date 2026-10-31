@@ -2,7 +2,7 @@
 
 ARMv7 loader for the international Exynos4210 Galaxy S2. It embeds XNU,
 generates Apple boot arguments/device tree, and transfers control from Samsung's
-kernel boot path. Companion XNU snapshot: **GPU31, 2026-10-31**.
+kernel boot path. Companion XNU snapshot: **HUD32, 2026-11-01**.
 
 Published branch: [kernel86-64/uniloader, i9100](https://github.com/kernel86-64/uniloader/tree/i9100).
 Companion kernel: [kernel86-64/xnu-i9100, i9100-source](https://github.com/kernel86-64/xnu-i9100/tree/i9100-source).
@@ -45,6 +45,9 @@ Default raw builds leave any previously generated archives untouched; select
 artifacts from the current manifest. No rootfs or Apple shared cache is embedded.
 
 ## Device status
+
+HUD32 keeps only GPU, BAT and LIVE IRQ in the runtime overlay, with one extra
+GPU detail row on failure. It retains the GPU31 self-test and input/trace path.
 
 The phone boots iOS 7 with working touch and a software display path. Home and
 running-kernel charger services are enabled. Complete charging and long-term

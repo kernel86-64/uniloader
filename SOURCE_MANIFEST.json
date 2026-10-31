@@ -1,5 +1,5 @@
 {
-  "stage": "GPU31",
+  "stage": "HUD32",
   "files": {
     ".github/workflows/build_test.sh": {
       "size": 560,
@@ -67,13 +67,13 @@
       "mode": "100644"
     },
     "PROVENANCE.json": {
-      "size": 520,
-      "sha256": "27d76ef5cc8fb53835e88b64a521f93f298c8ce26a09cc5789c11732d9b5cc07",
+      "size": 491,
+      "sha256": "078978955e0b97f257752228703f2ddb150ab67d5f99970cfb6dbae067efe94b",
       "mode": "100644"
     },
     "README.md": {
-      "size": 3414,
-      "sha256": "566c93403a3927663b176fc46aa484e80b86d620e24274911d3cb9ecdc359826",
+      "size": 3573,
+      "sha256": "d20f338df27ccea90da3ef7b080f5b83bc0b57068b5aa3efffde915226df6a4a",
       "mode": "100644"
     },
     "arch/Kconfig": {
@@ -761,9 +761,14 @@
       "sha256": "00804ce749bfe06e759a6ce7a3ed53f8dcf16c696177c2e7a15684f87ee522cb",
       "mode": "100644"
     },
+    "docs/progress/HUD32_COMPACT_OVERLAY_20261101.md": {
+      "size": 2124,
+      "sha256": "390e5d5fc50f3e0137f75176b6763188e912e5327db4d8f29e0b9086ffacf10e",
+      "mode": "100644"
+    },
     "docs/progress/README.md": {
-      "size": 800,
-      "sha256": "5f4cc3fa9ddaf3802e50a0038751842e11a8b37604ceb73c0c7e25ad6a57ba41",
+      "size": 884,
+      "sha256": "b846fd26bd71db4ec17b1a49aa55d0686a71396262b60377266910cfacde3486",
       "mode": "100644"
     },
     "docs/progress/RM29_REFMOD_RETENTION_20261031.md": {
