@@ -40,14 +40,19 @@ zimg_header:
 	mov	r0, r0
 	b	1f			@ branch over the magic (@0x20 -> 0x40)
 	.word	0x016f2818		@ ARM linux zImage magic @0x24
-	.word	0			@ preferred load address (unused)
-	.space	0x14			@ pad; entry lands on the 64B line @0x40
+	.word	0x40008000		@ start address @0x28 (standard Exynos load address)
+	.word	_image_end_phys		@ end address @0x2c (exact DRAM end)
+	.word	0x04030201		@ little-endian flag @0x30
+	.space	0x0c			@ pad; entry lands on the 64B line @0x40
 1:
 
 .section .text.start
 .globl _start
 .align	2
 _start:
+	mov	r10, r1			/* preserve bootloader r1 (machine type) */
+	mov	r11, r2			/* preserve bootloader r2 (atags pointer) */
+
 	/* Only CPU0 continues; park any secondary cores S-Boot released.
 	 * Concurrent entry corrupts everything downstream silently. */
 	mrc	p15, 0, r12, c0, c0, 5	/* MPIDR */
@@ -193,11 +198,6 @@ eng2:
 	movt	r2, #:upper16:__image_end
 	add	r4, r8, #ENGINE_SZ	/* engine home end */
 
-	/* publish the delta for C code (.data is at its linked home now) */
-	movw	r1, #:lower16:delta_value
-	movt	r1, #:upper16:delta_value
-	str	r9, [r1]
-
 	cmp	r9, #0
 	blt	51f
 
@@ -238,6 +238,20 @@ eng2:
 	mov	r12, #0
 	mcr	p15, 0, r12, c7, c5, 0	/* invalidate I-cache */
 	mcr	p15, 0, r12, c7, c5, 6	/* flush BTB */
+	isb
+
+	/* publish the delta for C code (.data is at its linked home now) */
+	movw	r1, #:lower16:delta_value
+	movt	r1, #:upper16:delta_value
+	str	r9, [r1]
+
+	/* publish boot registers r1 (machine type) and r2 (atags pointer) to .data */
+	movw	r1, #:lower16:boot_reg_r1
+	movt	r1, #:upper16:boot_reg_r1
+	str	r10, [r1]
+	movw	r1, #:lower16:boot_reg_r2
+	movt	r1, #:upper16:boot_reg_r2
+	str	r11, [r1]
 
 	/* ---- common path ---- */
 5:	/* D: WHITE @fb+0x11E000 = relocation done (both paths). */
@@ -319,25 +333,13 @@ END(load_kernel_and_jump)
  * Enter the XNU locore: r0 = physical boot_args, MMU off, SVC mode.
  */
 ENTRY(jump_to_xnu)
-	/* r0 = entry, r1 = boot_args -> XNU wants r0 = boot_args */
-	mov r3, r0              /* stash entry */
-	mov r0, r1              /* r0 = boot_args (physical) */
-
-	/* DIAG: WHITE @fb+0xE4000 = about to bx into the kernel. */
-	movw	r1, #0xD000
-	movt	r1, #0x57EE
-	movw	r2, #0xFFFF
-	movt	r2, #0xFFFF
-	mov	ip, #1600
-91:	str	r2, [r1], #4
-	subs	ip, ip, #1
-	bne	91b
-
-	mov r1, #0
-	mov r2, #0
-	mov ip, #0
-	mov lr, #0
-	bx r3                   /* jump to the kernel entry */
+	mov	r3, r0
+	mov	r0, r1
+	mov	r1, #0
+	mov	r2, #0
+	mov	ip, #0
+	mov	lr, #0
+	bx	r3
 END(jump_to_xnu)
 
 /* Published relocation delta (written by the engine, read by C code). */
@@ -348,6 +350,14 @@ delta_value:
 
 .globl entered_hyp
 entered_hyp:
+	.word 0
+
+.globl boot_reg_r1
+boot_reg_r1:
+	.word 0
+
+.globl boot_reg_r2
+boot_reg_r2:
 	.word 0
 
 /* Embedded payloads - NOT part of the relocated loader image. */

@@ -65,6 +65,8 @@ SECTIONS
 	}
 
 	_end = .;
+	_image_size = _end - __image_start;
+	_image_end_phys = 0x40008000 + _image_size;
 
 	/* size optimization for flat binaries. */
 	/DISCARD/ : {

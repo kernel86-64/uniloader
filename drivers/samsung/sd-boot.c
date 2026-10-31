@@ -64,12 +64,21 @@ extern int sd_chatter;
  * phone, so the values are pinned here and cannot be leaked in from a QEMU
  * config run.  Keep them in sync with configs/j1xlte_defconfig.
  */
+#if defined(CONFIG_SAMSUNG_I9100)
+#define J1_SD_PHYS_BASE		0x40000000
+#define J1_SD_MEMSIZE		0x40000000
+#define J1_SD_FB_BASE		0x43E00000
+#define J1_SD_FB_WIDTH		480
+#define J1_SD_FB_HEIGHT		800
+#define J1_SD_CMDLINE		"-v keepsyms=1 kprintf=1 debug=0x14e i9100uart=1 init=/sbin/launchd"
+#else
 #define J1_SD_PHYS_BASE		0x30000000
 #define J1_SD_MEMSIZE		0x25E00000
 #define J1_SD_FB_BASE		0x57E05000
 #define J1_SD_FB_WIDTH		480
 #define J1_SD_FB_HEIGHT		800
 #define J1_SD_CMDLINE		"-v keepsyms=1 kprintf=1 debug=0x14e j1slot=0x2fe26624 j1uart=1 init=/sbin/launchd"
+#endif
 /* mji: default = launchd (init= is per-test TEMP, set only for direct/shim
  * runs and reverted after). j1uart=1 is emulator-only. */
 /* mji Oct 8 2026: default = launchd (phone + emulator). init=/j1boot and
@@ -290,6 +299,7 @@ int sd_arch_load_kernel_xnu(unsigned int phys_base,
 
 	/* Apple-format device tree right behind the kernel, with the same
 	 * BSS guard arch_load_kernel_xnu uses. */
+	memset((void *)(load_pa + ksize), 0, 0x1000000);
 	dt_pa = align_up(load_pa + ksize + 0x1000000, 4);
 	if (sd_load_file("dtb", (void *)dt_pa, 0x100000, &dtsize))
 		return -1;

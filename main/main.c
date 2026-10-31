@@ -57,8 +57,13 @@ void main(void* dt, void* kernel, void* ramdisk)
 		printk(KERN_INFO, "cpu: CPSR=%08x SCTLR=%08x CPACR=%08x\n",
 		       cpsr_v, sctlr, cpacr);
 		printk(KERN_INFO, "entered_hyp=%u\n", entered_hyp);
+		{
+			extern unsigned int boot_reg_r1, boot_reg_r2;
+			printk(KERN_INFO, "boot_regs: r1=%08x r2=%08x\n",
+			       boot_reg_r1, boot_reg_r2);
+		}
 
-#ifndef CONFIG_QEMU_BOARD_VIRT_ARM
+#if !defined(CONFIG_QEMU_BOARD_VIRT_ARM) && !defined(CONFIG_SAMSUNG_I9100)
 		/* BRING-UP (J1): probe physical DRAM windows left free by
 		 * S-Boot.  Not valid on QEMU virt - those addresses are
 		 * outside the 0x40000000 RAM and would abort. */

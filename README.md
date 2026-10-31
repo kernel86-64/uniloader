@@ -1,47 +1,71 @@
-# uniLoader
+# uniLoader for Samsung Galaxy S2 GT-I9100
 
-**uniLoader** is a minimalistic loader, capable of booting Linux kernels.
-It can be used as an intermediate bootloader, providing a clean booting
-environment in case of a forced and buggy bootloader.
+ARMv7 loader for the international Exynos4210 Galaxy S2. It embeds XNU,
+generates Apple boot arguments/device tree, and transfers control from Samsung's
+kernel boot path. Companion XNU snapshot: **GPU31, 2026-10-31**.
 
----
+Published branch: [kernel86-64/uniloader, i9100](https://github.com/kernel86-64/uniloader/tree/i9100).
+Companion kernel: [kernel86-64/xnu-i9100, i9100-source](https://github.com/kernel86-64/xnu-i9100/tree/i9100-source).
 
-## Supported Architectures
-- ARMv7
-- ARMv8
+Based on [kOtusin/uniLoader](https://github.com/kOtusin/uniloader) and
+[ivoszbg/uniLoader](https://github.com/ivoszbg/uniLoader). Original GPLv2
+[license](LICENSE), [provenance](PROVENANCE.json), [source manifest](SOURCE_MANIFEST.json)
+and [upstream README](Documentation/README.upstream.md) are retained.
 
----
+## One-command build
 
-## Make Syntax
-```bash
-make ARCH=$(arch) CROSS_COMPILE=$(toolchain)
-```
----
+Use macOS, Apple Command Line Tools with classic ld64, Python 3, make and
+`arm-none-eabi-gcc`/binutils. Verified development versions: Apple clang 21.0.0
+and GCC 16.2.0. Linux paths are inherited and unverified. Clone the sources into
+sibling directories, then build from `uniloader`:
 
-## Building Example
-```bash
-sudo apt install aarch64-linux-gnu
-git clone https://github.com/ivoszbg/uniLoader
-cd uniLoader
-cp /home/user/linux/arch/arm64/boot/Image blob/Image
-cp /home/user/linux/arch/arm64/boot/dts/exynos/exynos8895-dreamlte.dtb blob/dtb
-cp /home/user/ramdisk.gz blob/ramdisk
-make ARCH=aarch64 CROSS_COMPILE=aarch64-linux-gnu- dreamlte_defconfig
-make ARCH=aarch64 CROSS_COMPILE=aarch64-linux-gnu-
+```sh
+git clone --branch i9100-source https://github.com/kernel86-64/xnu-i9100.git xnu
+git clone --branch i9100 https://github.com/kernel86-64/uniloader.git uniloader
+cd uniloader
 ```
 
-### Build with Clang and LLVM toolchain
-```bash
-make ARCH=aarch64 LLVM=1 dreamlte_defconfig
-make ARCH=aarch64 LLVM=1
+Run:
+
+```sh
+python3 scripts/build-i9100.py --xnu ../xnu --jobs 4
 ```
 
-```bash
-make ARCH=aarch64 CROSS_COMPILE=aarch64-linux-gnu- LLVM=/bin dreamlte_defconfig
-make ARCH=aarch64 CROSS_COMPILE=aarch64-linux-gnu- LLVM=/bin
+Default outputs in `out/`: raw **`zImage`**, matching **`mach_kernel.sys`** and
+**`assym.s`**, and **`manifest.json`** with hashes, kernel UUID/entry and source
+identity. Keep these together for debugging. The build generates a minimal
+Apple device tree with `chosen/display-scale` as native uint32 1, creates an
+empty ramdisk, selects `i9100_defconfig`, and rebuilds the loader. It replaces
+the generated `.config`. The kernel entry comes from `LC_UNIXTHREAD` rather
+than the stale configuration fallback offset.
+
+Use `--skip-kernel` only with an already built, matching kernel and symbols.
+`--archives` additionally creates `boot.img`, `zImage.tar` and `boot.tar`.
+Default raw builds leave any previously generated archives untouched; select
+artifacts from the current manifest. No rootfs or Apple shared cache is embedded.
+
+## Device status
+
+The phone boots iOS 7 with working touch and a software display path. Home and
+running-kernel charger services are enabled. Complete charging and long-term
+stability remain unverified; random SpringBoard exits and limited speed persist.
+Mali hardware tests confirm clear/geometry and PP0 texture upload/sample/update.
+GPU31 fixes a clear-color channel swap exposed by GPU30's first alpha blend;
+the corrected blend and PP1–3 still need physical validation. iOS GLES/EAGL and
+GPU-accelerated SpringBoard are not implemented.
+
+For Download Mode, the raw artifact can be flashed with the existing command:
+
+```sh
+heimdall flash --KERNEL out/zImage
 ```
 
----
+This build tool does not flash a device. It targets **GT-I9100 only**; recovery,
+powered-off charging, audio, radios and suspend/resume are not implemented or
+verified. See the sibling XNU repository's `docs/GT-I9100.md` for board notes.
+Source publication is separate from a combined binary release: component
+licenses, including the XNU port's GPL thermistor data, need review before
+redistributing a built kernel. No Apple userspace, SDKs, firmware or rootfs is
+included here.
 
-## License
-This project is licensed under GPLv2.
+GPU and related development reports: [progress archive](docs/progress/README.md).

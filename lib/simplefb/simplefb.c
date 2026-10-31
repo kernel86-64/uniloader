@@ -71,6 +71,9 @@ void simplefb_mark(unsigned int step)
 			}
 		}
 	}
+#ifdef CONFIG_SAMSUNG_I9100
+	*(volatile uint32_t *)0x11C001A4 = 3;
+#endif
 }
 
 static void clean_fbmem(void *fb, int width, int height, int stride)
@@ -239,6 +242,9 @@ static void simplefb_console_write(int level, const char *prefix, const char *ms
 
 	__simplefb_raw_print(prefix, 0, FB_TEXT_TOP_PADDING, pc);
 	__simplefb_raw_print(msg, prefix_width, FB_TEXT_TOP_PADDING, body_color);
+#ifdef CONFIG_SAMSUNG_I9100
+	*(volatile uint32_t *)0x11C001A4 = 3;
+#endif
 }
 
 static const struct console simplefb_console = {
@@ -249,8 +255,10 @@ static int simplefb_probe(void *data)
 {
 	fb_info = data;
 
+#ifndef CONFIG_SAMSUNG_I9100
 	clean_fbmem((char*)fb_info->address, fb_info->width, fb_info->height,
 		 fb_info->stride);
+#endif
 
 	fb_info->scale_f = get_font_scale_factor();
 

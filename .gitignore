@@ -21,3 +21,27 @@ blob/Image
 blob/dtb
 drivers/*.a
 blob/ramdisk
+
+# Local builds and device data
+out/
+*.dSYM/
+__pycache__/
+*.pyc
+.DS_Store
+*.tar
+*.img
+*.hfs
+*.HFS
+*.dmg
+*.ipsw
+*.log
+
+# Raw artifacts and locally supplied Apple/device files
+/zImage
+/mach_kernel*
+/assym.s
+*.dmp
+*.core
+*.ipa
+*.mobileprovision
+dyld_shared_cache*

@@ -6,6 +6,7 @@
 
 #include <main/boot.h>
 #include <string.h>
+#include <lib/simplefb.h>
 
 #ifdef CONFIG_EMBED_XNU
 
@@ -452,50 +453,10 @@ if ((unsigned int)(p - cs) + clen > cs_size)
 	printk(KERN_INFO, "xnu: blob %u bytes, dt %u bytes\n",
 	       ksize, dtsize);
 
-#ifdef CONFIG_XNU_BLOB_LZ4
-	{
-		unsigned int compressed = ksize;
-
-		printk(KERN_INFO, "xnu: decoding %u bytes...\n", compressed);
-		/* The embedded blob is a raw LZ4 block; decode straight to
-		 * the load address (src lives in .payload, far from dst). */
-		ksize = (unsigned int) lz4_decompress(kernel, compressed,
-						      (void *)load_pa,
-						      CONFIG_XNU_MEMSIZE);
-		if (ksize == 59 || ksize == 85 || ksize == 101) {
-			printk(KERN_EMERG, "lz4: kernel FAILED line %u\n",
-			       ksize);
-			fb_mark(0x140000, 0xFFFF0000); /* red = lz4 died */
-			while (1)
-				;
-		}
-		if (!ksize) {
-			printk(KERN_EMERG, "lz4: decompression FAILED\n");
-			fb_mark(0x140000, 0xFFFF0000); /* red = lz4 died */
-			while (1)
-				;
-		}
-		printk(KERN_INFO, "xnu: decoded %u bytes to 0x%08x\n",
-		       ksize, load_pa);
-	}
-#else
-	memcpy((void *)load_pa, kernel, ksize);
-	{
-		volatile unsigned int *p = (volatile unsigned int *)load_pa;
-		unsigned int sum = 0, i;
-
-		for (i = 0; i < ksize; i += 4)
-			sum += p[i >> 2];
-		printk(KERN_INFO, "xnu: copied %u bytes to 0x%08x sum=%08x\n",
-		       ksize, load_pa, sum);
-	}
-#endif
-
 	/* Apple-format device tree right behind the kernel image.
-	 * MUST skip past the kernel's BSS: __DATA vmsize > filesize, and
-	 * kernel statics written at runtime physically alias the DT/boot
-	 * args region if placed at file-end (observed: args fields turned
-	 * into pixel-color garbage like 0xFF000000). */
+	 * Place DT, boot_args, and ramdisk FIRST before copying/zeroing the kernel,
+	 * because in raw DRAM payload mode, copying or zeroing the kernel would
+	 * otherwise overwrite the DT/ramdisk source blobs in DRAM. */
 	dt_pa = align_up(load_pa + ksize + 0x1000000, 4);
 	memcpy((void *)dt_pa, dt, dtsize);
 
@@ -732,6 +693,48 @@ if ((unsigned int)(p - cs) + clen > cs_size)
 		}
 	}
 
+#ifdef CONFIG_XNU_BLOB_LZ4
+	{
+		unsigned int compressed = ksize;
+
+		printk(KERN_INFO, "xnu: decoding %u bytes...\n", compressed);
+		/* The embedded blob is a raw LZ4 block; decode straight to
+		 * the load address (src lives in .payload, far from dst). */
+		ksize = (unsigned int) lz4_decompress(kernel, compressed,
+						      (void *)load_pa,
+						      CONFIG_XNU_MEMSIZE);
+		if (ksize == 59 || ksize == 85 || ksize == 101) {
+			printk(KERN_EMERG, "lz4: kernel FAILED line %u\n",
+			       ksize);
+			fb_mark(0x140000, 0xFFFF0000); /* red = lz4 died */
+			while (1)
+				;
+		}
+		if (!ksize) {
+			printk(KERN_EMERG, "lz4: decompression FAILED\n");
+			fb_mark(0x140000, 0xFFFF0000); /* red = lz4 died */
+			while (1)
+				;
+		}
+		printk(KERN_INFO, "xnu: decoded %u bytes to 0x%08x\n",
+		       ksize, load_pa);
+	}
+#else
+	memcpy((void *)load_pa, kernel, ksize);
+	{
+		volatile unsigned int *p = (volatile unsigned int *)load_pa;
+		unsigned int sum = 0, i;
+
+		for (i = 0; i < ksize; i += 4)
+			sum += p[i >> 2];
+		printk(KERN_INFO, "xnu: copied %u bytes to 0x%08x sum=%08x\n",
+		       ksize, load_pa, sum);
+	}
+#endif
+
+	/* Clear kernel BSS up to dt_pa */
+	memset((void *)(load_pa + ksize), 0, 0x1000000);
+
 
 	{
 		unsigned int t1 = ba_pa + sizeof(*ba);
@@ -748,18 +751,43 @@ if ((unsigned int)(p - cs) + clen > cs_size)
 	ba->topOfKernelData = top;
 
 	ba->Video.v_baseAddr = CONFIG_XNU_FB_BASE;
+	{
+		extern struct video_info *fb_info;
+		if (fb_info && fb_info->address)
+			ba->Video.v_baseAddr = (uint32_t)fb_info->address;
+	}
 	ba->Video.v_display = 0;
 	ba->Video.v_rowBytes = CONFIG_XNU_FB_WIDTH * 4;
 	ba->Video.v_width = CONFIG_XNU_FB_WIDTH;
 	ba->Video.v_height = CONFIG_XNU_FB_HEIGHT;
 	ba->Video.v_depth = 32;
 
+#ifdef CONFIG_SAMSUNG_I9100
+	extern int i9100_is_real_hardware(void);
+	ba->machineType = i9100_is_real_hardware() ? 0xDC4 : 0;
+#else
 	ba->machineType = 0;
+#endif
 	ba->deviceTreeP = (void *)(dt_pa - phys_base + virt_base);
 	ba->deviceTreeLength = dtsize;
 
 	memcpy(ba->CommandLine, CONFIG_XNU_CMDLINE,
 	       sizeof(CONFIG_XNU_CMDLINE) - 1);
+#ifdef CONFIG_SAMSUNG_I9100
+	/* Preserve the bootloader's board revision, not boot_args.Revision (ABI).
+	 * The XNU power driver must select MAX8997 versus MAX8922 correctly. */
+	extern unsigned int i9100_hw_revision;
+	if (i9100_hw_revision <= 15U) {
+		static const char prefix[] = " i9100rev=0x";
+		unsigned int q = 0, n;
+		while (q < sizeof(ba->CommandLine) && ba->CommandLine[q]) q++;
+		if (q + sizeof(prefix) + 1U < sizeof(ba->CommandLine)) {
+			for (n = 0; prefix[n]; n++) ba->CommandLine[q++] = prefix[n];
+			ba->CommandLine[q++] = "0123456789abcdef"[i9100_hw_revision];
+			ba->CommandLine[q] = 0;
+		}
+	}
+#endif
 	if (dsc_arg[0]) {
 		unsigned int q = 0, dp = 0;
 
@@ -805,6 +833,7 @@ if ((unsigned int)(p - cs) + clen > cs_size)
 		printk(KERN_INFO, "xnu: entry offset %x (%s)\n", entry_off,
 		       entry_off == CONFIG_XNU_ENTRY_OFFSET ?
 		       "fallback" : "parsed");
+
 		jump_to_xnu(load_pa + entry_off, ba_pa);
 	}
 
