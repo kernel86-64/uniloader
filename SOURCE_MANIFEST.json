@@ -1,5 +1,5 @@
 {
-  "stage": "MALI33",
+  "stage": "MALI34",
   "files": {
     ".github/workflows/build_test.sh": {
       "size": 560,
@@ -67,13 +67,13 @@
       "mode": "100644"
     },
     "PROVENANCE.json": {
-      "size": 508,
-      "sha256": "4005363962e0930b297d50afe5d2958f55f42f297cd2e8b55ccf29a5bbab003b",
+      "size": 543,
+      "sha256": "b247652555fa2ff9c5e134f61dee8bb513678d0c9dd8d6672581860886759292",
       "mode": "100644"
     },
     "README.md": {
-      "size": 3654,
-      "sha256": "f1c504d5497a3588a2c8a7160fb81790dc4c017f49f5b952d75e8ae305a28456",
+      "size": 3856,
+      "sha256": "1dd34d90c4090d8ebb2c198d402b71b8182bb8c88d463ef05365dd6e3699fa41",
       "mode": "100644"
     },
     "arch/Kconfig": {
@@ -771,9 +771,14 @@
       "sha256": "1074b593b0a06f7b922478ae510409c1b2a02275dcebd4e94c72d348bec4a1db",
       "mode": "100644"
     },
+    "docs/progress/MALI34_CACHED_LAUNCH_JOB_20261101.md": {
+      "size": 3463,
+      "sha256": "c98ff9a9b572af6b96207ee8e21a3ed33b1b8c487e9d3137101dcbbeacf14c39",
+      "mode": "100644"
+    },
     "docs/progress/README.md": {
-      "size": 988,
-      "sha256": "9aa0816c744a46e5af60557da4d3e76eed54c4ba4cfa5bb872134e1d5cfb77cc",
+      "size": 1099,
+      "sha256": "1ece24e408f292f0dc1b8e474b9bb3bb21bb7f3337b51d3d50c359782e6d2eea",
       "mode": "100644"
     },
     "docs/progress/RM29_REFMOD_RETENTION_20261031.md": {

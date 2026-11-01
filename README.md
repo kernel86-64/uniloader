@@ -2,7 +2,7 @@
 
 ARMv7 loader for the international Exynos4210 Galaxy S2. It embeds XNU,
 generates Apple boot arguments/device tree, and transfers control from Samsung's
-kernel boot path. Companion XNU snapshot: **MALI33, 2026-11-01**.
+kernel boot path. Companion XNU snapshot: **MALI34, 2026-11-01** (kernel remains MALI33).
 
 Published branch: [kernel86-64/uniloader, i9100](https://github.com/kernel86-64/uniloader/tree/i9100).
 Companion kernel: [kernel86-64/xnu-i9100, i9100-source](https://github.com/kernel86-64/xnu-i9100/tree/i9100-source).
@@ -55,7 +55,9 @@ stability remain unverified; random SpringBoard exits and limited speed persist.
 Mali hardware tests confirm clear/geometry and PP0 texture upload/sample/update.
 GPU31 fixes a clear-color channel swap exposed by GPU30's first alpha blend;
 the corrected blend and all4 PP passed on the phone. The new MALI33 userspace
-transport/client is separate and awaits its own phone validation. iOS GLES/EAGL and
+transport/client is separate. MALI34 corrects the rootfs installer to register its
+one-shot job in the embedded XPC cache after the user reported U0/0. Keep the
+existing MALI33 kernel and replace only the rootfs; phone confirmation is pending. iOS GLES/EAGL and
 GPU-accelerated SpringBoard are not implemented.
 
 For Download Mode, the raw artifact can be flashed with the existing command:
