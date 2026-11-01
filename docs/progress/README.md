@@ -9,6 +9,7 @@ Current project status: [overview](../../README.md).
 - [GPU30: текстуры, прозрачность и четыре PP, 31.10.2026](GPU30_TEXTURES_BLEND_20261031.md)
 - [GPU31: RGBA clear registers and BGRA writeback](GPU31_CLEAR_PACKING_20261031.md)
 - [HUD32: compact GPU, BAT and LIVE IRQ overlay](HUD32_COMPACT_OVERLAY_20261101.md)
+- [MALI33: first bounded userspace-to-Mali rendering transport](MALI33_USERSPACE_TRANSPORT_20261101.md)
 - [RM29: сохранение ref/mod при отключении страниц, 31.10.2026](RM29_REFMOD_RETENTION_20261031.md)
 
 ## Pinned source references

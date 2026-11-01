@@ -1,5 +1,5 @@
 {
-  "stage": "HUD32",
+  "stage": "MALI33",
   "files": {
     ".github/workflows/build_test.sh": {
       "size": 560,
@@ -67,13 +67,13 @@
       "mode": "100644"
     },
     "PROVENANCE.json": {
-      "size": 491,
-      "sha256": "078978955e0b97f257752228703f2ddb150ab67d5f99970cfb6dbae067efe94b",
+      "size": 508,
+      "sha256": "4005363962e0930b297d50afe5d2958f55f42f297cd2e8b55ccf29a5bbab003b",
       "mode": "100644"
     },
     "README.md": {
-      "size": 3573,
-      "sha256": "d20f338df27ccea90da3ef7b080f5b83bc0b57068b5aa3efffde915226df6a4a",
+      "size": 3654,
+      "sha256": "f1c504d5497a3588a2c8a7160fb81790dc4c017f49f5b952d75e8ae305a28456",
       "mode": "100644"
     },
     "arch/Kconfig": {
@@ -766,9 +766,14 @@
       "sha256": "390e5d5fc50f3e0137f75176b6763188e912e5327db4d8f29e0b9086ffacf10e",
       "mode": "100644"
     },
+    "docs/progress/MALI33_USERSPACE_TRANSPORT_20261101.md": {
+      "size": 4288,
+      "sha256": "1074b593b0a06f7b922478ae510409c1b2a02275dcebd4e94c72d348bec4a1db",
+      "mode": "100644"
+    },
     "docs/progress/README.md": {
-      "size": 884,
-      "sha256": "b846fd26bd71db4ec17b1a49aa55d0686a71396262b60377266910cfacde3486",
+      "size": 988,
+      "sha256": "9aa0816c744a46e5af60557da4d3e76eed54c4ba4cfa5bb872134e1d5cfb77cc",
       "mode": "100644"
     },
     "docs/progress/RM29_REFMOD_RETENTION_20261031.md": {
